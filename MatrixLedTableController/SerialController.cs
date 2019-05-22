@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
+using System.Threading;
 
 namespace MatrixLedTableController
 {
@@ -27,9 +28,10 @@ namespace MatrixLedTableController
 
         public void Open()
         {
-            if(!File.Exists(name) && Program.GetParameterInt("comcheck", 1) == 1)
+            if (!File.Exists(name) && Program.GetParameterInt("comcheck", 0) == 1)
             {
                 Program.Log(TAG, "Port " + name + " does not exist!");
+                Program.Log(TAG, ".FAILED");
                 return;
             }
 
@@ -44,37 +46,50 @@ namespace MatrixLedTableController
             catch
             {
                 Program.Log(TAG, "Opening port failed.");
+                Program.Log(TAG, ".FAILED");
                 return;
             }
 
-            Program.Log(TAG, "Port opened. Ready for incoming data!");
-
-            while (true)
+            new Thread(delegate ()
             {
-                try
-                {
-                    if (mySerial.BytesToRead > 0)
-                    {
-                        string input = mySerial.ReadLine();
-                        Program.Log(TAG + "/In", input);
-                        OnMessageReceived(input);
-                    }
+                Program.Log(TAG, "Port opened. Ready for incoming data!");
+                Program.Log(TAG, ".OK");
 
-                    if (!string.IsNullOrEmpty(toSend))
+                //TODO Edited from true
+                while (mySerial.IsOpen)
+                {
+                    try
                     {
-                        Program.LogFullLength(TAG + "/Out", toSend);
-                        mySerial.Write(toSend);
-                        toSend = string.Empty;
+                        if (mySerial.BytesToRead > 0)
+                        {
+                            string input = mySerial.ReadLine();
+                            if (Program.GetParameter("serial-verbose", "true") == "true")
+                                Program.Log(TAG + "/In", input);
+                            OnMessageReceived(input);
+                        }
+
+                        if (!string.IsNullOrEmpty(toSend))
+                        {
+                            if (Program.GetParameter("serial-verbose", "true") == "true")
+                                Program.LogFullLength(TAG + "/Out", toSend);
+                            mySerial.Write(toSend);
+                            toSend = string.Empty;
+                        }
+                    }
+                    catch (TimeoutException ex)
+                    {
+                        Program.Log(TAG, "Error:" + ex.Message);
+                        break;
                     }
                 }
-                catch (TimeoutException ex)
-                {
-                    Program.Log(TAG, "Error:" + ex.Message);
-                    break;
-                }
-            }
 
-            Program.Log(TAG, "Connection ended.");
+                Program.Log(TAG, "Connection ended.");
+            }).Start();
+        }
+
+        public void Close()
+        {
+            mySerial.Close();
         }
 
         public void Write(string message)

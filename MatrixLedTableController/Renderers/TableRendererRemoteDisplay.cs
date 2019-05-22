@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MatrixLedTableController.Apps;
 using System.Diagnostics;
 
@@ -19,13 +15,15 @@ namespace MatrixLedTableController
             server = new TcpCommunicationServer(25568, true);
             server.LaunchServer();
 
-            string displayPath = @"C:\Users\Paul\Documents\Visual Studio 2015\Projects\TableSimulator\TableSimulator\bin\Debug\TableSimulator.exe";
+            string displayPath = @"D:\Projekte\Visual Studio\TableSimulator\TableSimulator\bin\Debug\TableSimulator.exe";
 
+            /*
             if (System.IO.File.Exists(displayPath))
             {
                 displayProcess = Process.Start(displayPath);
                 Console.CancelKeyPress += OnProcesssExit;
             }
+            */
         }
 
         void OnProcesssExit(object sender, EventArgs e)
@@ -41,12 +39,18 @@ namespace MatrixLedTableController
 
             bool madeChange = false;
             string outString = string.Empty;
-            for(int x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
                     if (!preMap[x, y].Same(colorMap[x, y]))
                     {
+                        preMap[x, y] = colorMap[x, y];
+                        if (Mathf.IsOdd(y))
+                        {
+                            y = height - y;
+                        }
+
                         outString += string.Format("{0};{1}_{2}:{3}:{4}|", new object[]
                         {
                         x,
@@ -58,6 +62,7 @@ namespace MatrixLedTableController
                         madeChange = true;
                         preMap[x, y] = colorMap[x, y];
                     }
+
                 }
             }
             outString = outString.TrimEnd('|').Trim();
@@ -66,6 +71,11 @@ namespace MatrixLedTableController
             {
                 server.Send(outString);
             }
+        }
+
+        public override void CleanUp()
+        {
+            server.ShutdownServer();
         }
     }
 }

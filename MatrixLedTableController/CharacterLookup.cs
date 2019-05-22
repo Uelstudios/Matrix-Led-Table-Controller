@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 
-using Xamarin.Forms;
-
 namespace MatrixLedTableController
 {
     public static class CharacterLookup
@@ -15,6 +13,7 @@ namespace MatrixLedTableController
 
         public static ulong GetCharUlong(char c)
         {
+            c = c.ToString().ToUpper().ToCharArray()[0];
             switch(c)
             {
                 case 'A':    return 227873781661662;

@@ -113,6 +113,11 @@ namespace MatrixLedTableController.Apps
             }
         }
 
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(true, false);
+        }
+
         class Ship
         {
             public Position position;

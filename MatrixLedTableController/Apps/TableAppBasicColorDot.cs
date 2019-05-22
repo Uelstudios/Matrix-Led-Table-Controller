@@ -47,5 +47,10 @@ namespace MatrixLedTableController.Apps
                 currentColor = PixelColor.Random(new Random());
             }
         }
+
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(true, false);
+        }
     }
 }

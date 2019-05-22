@@ -74,6 +74,11 @@ namespace MatrixLedTableController.Apps
                 }
         }
 
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(true, false);
+        }
+
         class Tetramino
         {
             public Position position;
@@ -201,7 +206,7 @@ namespace MatrixLedTableController.Apps
                         return new Position[] { };
                 }
             }
-
+           
         }
 
         class GameGrid

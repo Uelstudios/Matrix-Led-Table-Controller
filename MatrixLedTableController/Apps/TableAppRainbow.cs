@@ -35,11 +35,16 @@ namespace MatrixLedTableController.Apps
 
                     if (p > 1)
                         p -= 1;
-                    m[x, y] = PixelColor.FromHSL(p, 0.5f, 0.5f);
+                    m[x, y] = PixelColor.FromHSL(p, 1f, 0.5f);
                 }
             }
 
             SetPixels(m);
+        }
+
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(false, true);
         }
     }
 }

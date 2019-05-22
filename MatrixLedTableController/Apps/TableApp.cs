@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace MatrixLedTableController.Apps
 {
-    class TableApp
+    abstract class TableApp
     {
         private PixelColor[,] colorMap;
-        public enum ClientUserInterface { None = 0, XPad = 1, RunningText = 2, List = 3, Paint = 4 };
-        public ClientUserInterface userInterface = ClientUserInterface.None;
+        public enum ClientUserInterface { None = 0, XPad = 1, RunningText = 2, List = 3, Paint = 4, Custom = 5 };
+        public ClientUserInterface userInterface = ClientUserInterface.Custom;
         public bool selectable = true;
 
         public int updateSpeed = 200;
 
         public void Init()
         {
-            colorMap = PixelColor.GetSingleColorMap(Program.TableWidth, Program.TableHeight, PixelColor.BLACK);
+            ClearPixels();
         }
 
         public string GetName()
@@ -26,10 +26,9 @@ namespace MatrixLedTableController.Apps
             return internalAppName.Substring(internalAppName.LastIndexOf('.') + 1).Trim();
         }
 
-        public virtual void Draw()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Draw();
+
+        public abstract FeatureSet GetFeatures();
 
         public void RenderToTable()
         {
@@ -39,6 +38,18 @@ namespace MatrixLedTableController.Apps
         protected void ClearPixels()
         {
             colorMap = PixelColor.GetSingleColorMap(Program.TableWidth, Program.TableHeight, PixelColor.BLACK);
+        }
+
+        protected void SetPixelAtIndex(int index, PixelColor c)
+        {
+            int y = index / Program.TableWidth;
+            int x = index - y * Program.TableWidth;
+            SetPixel(x, y, c);
+        }
+
+        protected void SetPixel(Position pos, PixelColor c)
+        {
+            SetPixel(pos.x, pos.y, c);
         }
 
         protected void SetPixel(int x, int y, PixelColor c)
@@ -55,7 +66,7 @@ namespace MatrixLedTableController.Apps
 
         protected void GameOver(string message, int score, string gameName)
         {
-            Program.communicationServer.Send(string.Format("/Gameover {0}|{1}|{2}", message, score, gameName));
+            //Program.communicationServer.Send(string.Format("/Gameover {0}|{1}|{2}", message, score, gameName));
         }
 
         protected void Close()
@@ -71,15 +82,28 @@ namespace MatrixLedTableController.Apps
         public virtual void OnTouchUpdated(TouchManager manager) { }
 
         public enum InputKey { Unknown, XPadLeft, XPadRight, XPadUp, XPadDown, XPadAction };
-        public virtual void OnInputMade(InputKey key)
-        { }
+        public virtual void OnInputMade(InputKey key) { }
 
-        public virtual void OnRawInput(string msg)
-        { }
+        public virtual void OnRawInput(string msg) { }
+
+        public virtual void OnControllerInput(int controller, GamepadManager.GamepadKey key) { }
+
+        public virtual void OnCustomInterfaceInput(string id, string data)
+        {
+            if (id == "updateSpeed")
+            {
+                updateSpeed = int.Parse(data);
+            }
+        }
+
+        public virtual CustomInterface GetCustomInterface()
+        {
+            return new CustomInterface().AddSlider("updateSpeed", updateSpeed, 1, 300);
+        }
 
         public static InputKey GetCorrespondingKey(string kString)
         {
-            switch(kString)
+            switch (kString)
             {
                 case "pad_action":
                     return InputKey.XPadAction;
@@ -94,6 +118,17 @@ namespace MatrixLedTableController.Apps
                 default:
                     return InputKey.Unknown;
             }
+        }
+    }
+
+    struct FeatureSet
+    {
+        public bool gamepad, touch;
+
+        public FeatureSet(bool gamepad, bool touch)
+        {
+            this.gamepad = gamepad;
+            this.touch = touch;
         }
     }
 }

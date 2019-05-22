@@ -7,7 +7,7 @@ using MatrixLedTableController.Apps;
 
 namespace MatrixLedTableController
 {
-    public class TableRenderer
+    public abstract class TableRenderer
     {
         public int width, height;
 
@@ -15,11 +15,13 @@ namespace MatrixLedTableController
         {
             this.width = width;
             this.height = height;
+
+            Program.Log("TableRenderer", "Selected Renderer: " + ToString());
+            Program.Log("TableRenderer", ".OK");
         }
 
-        public virtual void Render(PixelColor[,] colorMap) 
-        {
-            //Not Implemented
-        }
+        public abstract void Render(PixelColor[,] colorMap);
+
+        public abstract void CleanUp();
     }
 }

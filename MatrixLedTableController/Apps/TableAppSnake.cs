@@ -72,6 +72,11 @@ namespace MatrixLedTableController.Apps
             Program.tableAppManager.LaunchApp(new TableAppCha0s());
         }
 
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(true, false);
+        }
+
         public class Food
         {
             public Position position;

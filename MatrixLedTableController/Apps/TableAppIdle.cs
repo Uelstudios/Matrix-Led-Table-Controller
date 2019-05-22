@@ -8,76 +8,87 @@ namespace MatrixLedTableController.Apps
 {
     class TableAppIdle : TableApp
     {
-        List<MovingDot> dots = new List<MovingDot>();
+        bool[,] touchMap = new bool[Program.TableWidth, Program.TableHeight];
+        float time = 0;
+        float midBrightness = 0f;
 
         public TableAppIdle()
         {
+            userInterface = ClientUserInterface.None;
             selectable = false;
-            updateSpeed = 50;
-
-
-            for(int i = 0; i < 9; i++)
-                dots.Add(new MovingDot(new Position(i, 0), new Position(1, 0), 0, 0, PixelColor.FromHSL(i / 50f, 0.5, 0.5)));
-            for (int i = 9; i > 0; i--)
-                dots.Add(new MovingDot(new Position(i, 9), new Position(-1, 0), 0, 0, PixelColor.FromHSL(i / 50f + 0.5, 0.5, 0.5)));
+            updateSpeed = 5;
         }
 
         public override void Draw()
         {
             ClearPixels();
-            foreach (MovingDot d in dots)
+
+            for (int x = 0; x < Program.TableWidth; x++)
+                for (int y = 0; y < Program.TableHeight; y++)
+                    SetPixel(x, y, PixelColor.FromHSL(0.0, 0.0, midBrightness));
+
+
+            int dirStep = 0;
+            int nextStep = 0;
+            Position pos = new Position(0, 0);
+            for (int i = 0; i < 36; i++)
             {
-                d.Update();
-                SetPixel(d.GetPositon().x, d.GetPositon().y, d.color);
+                float hsv = i / 36f + time;
+                if (hsv > 1f) hsv -= (float)Math.Floor(hsv);
+
+                SetPixel(pos.x, pos.y, PixelColor.FromHSL(hsv, 1f, 0.5));
+                if (dirStep == 0)
+                {
+                    pos.x++;
+                }
+                else if (dirStep == 1)
+                {
+                    pos.y++;
+                }
+                else if (dirStep == 2)
+                {
+                    pos.x--;
+                }
+                else if (dirStep == 3)
+                {
+                    pos.y--;
+                }
+
+                nextStep++;
+                if (nextStep >= 9)
+                {
+                    dirStep++;
+                    nextStep = 0;
+                }
+            }
+
+            time += 0.015f / 10f;
+            if (midBrightness > 0f) midBrightness -= 0.08f / 10f;
+        }
+
+        public override void OnTouchUpdated(TouchManager manager)
+        {
+            for (int x = 0; x < touchMap.GetLength(0); x++)
+            {
+                for (int y = 0; y < touchMap.GetLength(1); y++)
+                {
+                    touchMap[x, y] = manager.GetInputAt(new Position(x, y));
+                }
             }
         }
 
-        public class MovingDot
+        public override void OnInputMade(InputKey key)
         {
-            public PixelColor color;
-            Position position;
-            Position speed;
-            int bound;
-            int skipStep;
-            int currentSkip = 0;
-
-            public MovingDot(Position start, Position direction, int bound, int skipStep, PixelColor c)
+            if (key == InputKey.XPadAction)
             {
-                position = start;
-                speed = direction;
-                this.bound = bound;
-                color = c;
-                this.skipStep = skipStep;
+                midBrightness = 1f;
             }
+        }
 
-            public void Update ()
-            {
-                if (currentSkip > skipStep)
-                {
-                    currentSkip = 0;
 
-                    if (position.x + speed.x >= Program.TableWidth - bound)
-                        speed = new Position(0, 1);
-                    if (position.y + speed.y >= Program.TableHeight - bound)
-                        speed = new Position(-1, 0);
-                    if (position.x + speed.x < bound)
-                        speed = new Position(0, -1);
-                    if (position.y + speed.y < bound)
-                        speed = new Position(1, 0);
-
-                    position += speed;
-
-                }
-                else
-                {
-                    currentSkip++;
-                }
-            }
-
-            public Position GetPositon()
-            {
-                return position;
-            }
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet();
         }
     }
 }

@@ -21,6 +21,7 @@ namespace MatrixLedTableController.Apps
 
         public TableAppAnimation(Animation animation)
         {
+            /*
             fps = animation.fps;
 
             int frameCount = 5;         //animation.frames.Length
@@ -39,10 +40,12 @@ namespace MatrixLedTableController.Apps
                 frames.Add(currentFrame);
             }
             animationPhases = frames.ToArray();
+            */
         }
 
         public override void Draw()
         {
+            /*
             _nextAnimation += fps / 20;
 
             if(_nextAnimation > 100)
@@ -55,7 +58,12 @@ namespace MatrixLedTableController.Apps
             }
 
             SetPixels(animationPhases[_animationStep]);
+            */
         }
 
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(false, false);
+        }
     }
 }

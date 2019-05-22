@@ -65,5 +65,9 @@ namespace MatrixLedTableController
             }
         }
 
+        public override void CleanUp()
+        {
+            server.ShutdownServer();
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace MatrixLedTableController.Apps
         public static PixelColor BLUE = new PixelColor(0, 0, 255);
         public static PixelColor GREEN = new PixelColor(0, 255, 0);
         public static PixelColor YELLOW = new PixelColor(255, 255, 0);
-        public static PixelColor ORANGE = new PixelColor(255, 255, 128);
+        public static PixelColor ORANGE = new PixelColor(255, 255, 0);
         public static PixelColor PURPLE = new PixelColor(255, 0, 255);
         public static PixelColor CYAN = new PixelColor(128, 128, 255);
 
@@ -43,7 +43,7 @@ namespace MatrixLedTableController.Apps
 
         public bool Same(PixelColor color)
         {
-            return 
+            return
                 r == color.r &&
                 g == color.g &&
                 b == color.b;
@@ -52,14 +52,23 @@ namespace MatrixLedTableController.Apps
         public static PixelColor[,] GetSingleColorMap(int w, int h, PixelColor color)
         {
             PixelColor[,] m = new PixelColor[w, h];
-            for(int x = 0; x < w; x++)
+            for (int x = 0; x < w; x++)
             {
-                for(int y = 0; y < h; y++)
+                for (int y = 0; y < h; y++)
                 {
                     m[x, y] = color;
                 }
             }
             return m;
+        }
+
+        public static PixelColor LerpRGB(PixelColor a, PixelColor b, float t)
+        {
+            float _r = a.r + (b.r - a.r) * t;
+            float _g = a.g + (b.g - a.g) * t;
+            float _b = a.b + (b.b - a.b) * t;
+
+            return new PixelColor((int)Math.Round(_r), (int)Math.Round(_g), (int)Math.Round(_b));
         }
 
         // Given H,S,L in range of 0-1
@@ -179,6 +188,8 @@ namespace MatrixLedTableController.Apps
                 }
 
             }
+
+            if (r < 0f || g < 0f || b < 0f || r > 1f || g > 1f || b > 1f) return PixelColor.BLACK;
 
             PixelColor color = new PixelColor(Convert.ToByte(r * 255.0f), Convert.ToByte(g * 255.0f), Convert.ToByte(b * 255.0f));
             return color;

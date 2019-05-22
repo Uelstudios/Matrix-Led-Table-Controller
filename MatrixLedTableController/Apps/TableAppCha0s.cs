@@ -11,16 +11,20 @@ namespace MatrixLedTableController.Apps
         public TableAppCha0s()
         {
             updateSpeed = 1;
-            userInterface = ClientUserInterface.Paint;
         }
 
         public override void Draw()
         {
-            Random rand = new Random();
-            int w = rand.Next(0, Program.TableWidth);
-            int h = rand.Next(0, Program.TableHeight);
+            int w = Program.random.Next(0, Program.TableWidth);
+            int h = Program.random.Next(0, Program.TableHeight);
 
-            SetPixel(w, h, PixelColor.Random(rand));
+            float hue = Program.random.Next(100) / 100f;
+            SetPixel(w, h, PixelColor.FromHSL(hue, 1f, 0.5f));
+        }
+
+        public override FeatureSet GetFeatures()
+        {
+            return new FeatureSet(false, false);
         }
     }
 }

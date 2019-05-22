@@ -63,6 +63,11 @@ namespace MatrixLedTableController
             //Program.serialController.Write(output);
             Program.serialController.Write(output + "D");
         }
+
+        public override void CleanUp()
+        {
+            
+        }
     }
     
     public struct DataFragment
